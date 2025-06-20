@@ -16,4 +16,5 @@ public class ServiceConfig {
     ) {
         return new MovieService(movieRepository, openAIGateway);
     }
+
 }
