@@ -24,7 +24,7 @@ EXPOSE 8080
 
 ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 ENV JAVA_APP_JAR="/deployments/quarkus-app/quarkus-run.jar"
-ENV URL=""
+ENV URL=" "
 ENV BEARER=""
 ENV MODEL=""
 ENV MONGODB_URI=""
