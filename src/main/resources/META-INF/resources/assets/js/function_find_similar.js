@@ -3,7 +3,7 @@ async function fetchAndDisplayMovies(data) {
         const resultsDiv = document.getElementById('movieResults');
         resultsDiv.innerHTML = '<div class="loading"><span class="badge bg-light text-dark" style="font-size: 30px">Loading movies...</span></div>';
 
-        const response = await fetch('http://localhost:8080/movies/findSimilar', {
+        const response = await fetch('https://movies-finder-vsnw.onrender.com/movies/findSimilar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
