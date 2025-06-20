@@ -1,29 +1,26 @@
-FROM maven:3.9.6-eclipse-temurin-21
+# Etapa 1: build (modo JVM)
+FROM quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21 AS build
+WORKDIR /code
+COPY --chown=quarkus:quarkus --chmod=0755 mvnw ./
+COPY --chown=quarkus:quarkus .mvn .mvn
+COPY --chown=quarkus:quarkus pom.xml ./
+USER quarkus
+RUN ./mvnw clean package -DskipTests
 
-WORKDIR /app
+# Etapa 2: imagem final (modo JVM)
+FROM registry.access.redhat.com/ubi9/openjdk-21-runtime
+WORKDIR /work/
 
-COPY . /app
+# Copia o app JVM
+COPY --from=build /code/target/quarkus-app /work/quarkus-app
 
-RUN mvn clean package -DskipTests
-
-
-FROM registry.access.redhat.com/ubi9/openjdk-21:1.21
-
-ENV LANGUAGE='en_US:en'
-
-# We make four distinct layers so if there are application changes the library layers can be re-used
-COPY --chown=185 target/quarkus-app/lib/ /deployments/lib/
-COPY --chown=185 target/quarkus-app/*.jar /deployments/
-COPY --chown=185 target/quarkus-app/app/ /deployments/app/
-COPY --chown=185 target/quarkus-app/quarkus/ /deployments/quarkus/
+# Troca para root para mudar permissões
+USER root
+RUN chown -R 1001:root /work \
+ && chmod -R "g+rwX" /work
 
 EXPOSE 8080
-USER 185
-ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
-ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
-ENV URL=""
-ENV BEARER=""
-ENV MODEL=""
-ENV MONGODB_URI=""
 
-ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
+# Volta ao usuário não-root para rodar o app
+USER 1001
+CMD ["java", "-jar", "/work/quarkus-app/quarkus-run.jar", "-Dquarkus.http.host=0.0.0.0"]
