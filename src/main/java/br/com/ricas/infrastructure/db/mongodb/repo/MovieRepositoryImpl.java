@@ -26,8 +26,8 @@ public class MovieRepositoryImpl implements PanacheMongoRepository<MovieDocument
                                     .append("numCandidates", 40)
                                     .append("index", "vector_index")
                                     .append("limit", 30)
-                    ),
-                    new Document("$sort", new Document("imdb.rating", -1))
+                    )
+//                    new Document("$sort", new Document("imdb.rating", -1))
             ));
 
             for (MovieDocument movieEntity : aggregate) {
