@@ -23,9 +23,9 @@ public class MovieRepositoryImpl implements PanacheMongoRepository<MovieDocument
                             "$vectorSearch",
                             new Document("queryVector", embedding)
                                     .append("path", "movie_embedded")
-                                    .append("numCandidates", 20)
+                                    .append("numCandidates", 40)
                                     .append("index", "vector_index")
-                                    .append("limit", 15)
+                                    .append("limit", 30)
                     ),
                     new Document("$sort", new Document("imdb.rating", -1))
             ));

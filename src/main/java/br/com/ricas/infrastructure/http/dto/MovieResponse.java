@@ -11,7 +11,8 @@ public record MovieResponse(
         int year,
         List<String> genres,
         List<String> cast,
-        Object rating) {
+        Object rating,
+        String poster) {
     public static MovieResponse fromDomain(Movie movie) {
         return new MovieResponse(
                 movie.id(),
@@ -21,7 +22,8 @@ public record MovieResponse(
                 movie.year(),
                 movie.genres(),
                 movie.cast(),
-                movie.rating()
+                movie.rating(),
+                movie.poster()
         );
     }
 }
