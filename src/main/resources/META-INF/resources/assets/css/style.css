@@ -158,3 +158,25 @@ body, html {
   color: #ffffff !important;
   text-decoration: underline;
 }
+body {
+  padding-top: 70px;
+}
+
+.navbar {
+  background-color: var(--dark-2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-text {
+  /*color: rgba(255, 255, 255, 0.85);*/
+  color: gray;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.color-a {
+  color: #08d665;
+}
+.color-b {
+  color: #0f3d81;
+}
