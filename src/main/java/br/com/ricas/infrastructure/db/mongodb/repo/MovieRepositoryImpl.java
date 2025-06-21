@@ -10,7 +10,6 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @ApplicationScoped
 public class MovieRepositoryImpl implements PanacheMongoRepository<MovieDocument>, MovieRepository {
 
@@ -26,8 +25,9 @@ public class MovieRepositoryImpl implements PanacheMongoRepository<MovieDocument
                                     .append("path", "movie_embedded")
                                     .append("numCandidates", 20)
                                     .append("index", "vector_index")
-                                    .append("limit", 10)
-                    )
+                                    .append("limit", 15)
+                    ),
+                    new Document("$sort", new Document("imdb.rating", -1))
             ));
 
             for (MovieDocument movieEntity : aggregate) {
