@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <title>Movie Finder 2.0</title>
 
     <!-- Fonts & Bootstrap -->
@@ -27,28 +25,11 @@
             background: linear-gradient(135deg, var(--dark-1) 0%, var(--dark-2) 100%);
         }
 
-        .navbar {
-            background: transparent;
-        }
-
-        .navbar-brand {
-            font-weight: 600;
-            color: var(--light);
-        }
-
         .hero {
             min-height: 100vh;
-            /*background: url('/assets/page/movie-hero.jpg') center/cover no-repeat;*/
             position: relative;
             display: flex;
             align-items: center;
-        }
-
-        .hero::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(14, 19, 32, 0.75);
         }
 
         .hero-content {
@@ -60,12 +41,6 @@
         .hero h1 {
             font-size: clamp(2rem, 4vw, 3.2rem);
             font-weight: 600;
-        }
-
-        .charts-hero iframe {
-            border-radius: 0.6rem;
-            border: none;
-            width: 100%;
         }
 
         .search-wrapper {
@@ -107,54 +82,29 @@
             text-decoration: underline;
         }
 
-        @media (max-width: 576px) {
-            .search-wrapper {
-                padding-inline: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .charts-hero .col-md-4 {
-                margin-bottom: 1rem;
-            }
+        .spinner-container {
+            text-align: center;
+            padding: 3rem 1rem;
         }
     </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script src="assets/vendor/aos/aos.js" defer></script>
-    <script src="assets/js/function_find_similar.js" defer></script>
-    <script src="assets/js/main.js" defer></script>
 </head>
 <body>
 
 <section class="hero">
-    <div class="container hero-content text-center" data-aos="fade-up">
-
+    <div class="container hero-content text-center">
         <h1 class="mb-4">Find the perfect movie in seconds</h1>
         <p class="mb-5 opacity-75">Describe what you’d like to watch – we’ll do the rest.</p>
-
         <form id="movieForm" class="search-wrapper">
             <div class="input-group">
-                <input id="searchQuery" name="searchQuery" type="text" class="form-control"
-                       placeholder="e.g., Time-travel romance in Paris…" />
+                <input id="searchQuery" name="searchQuery" type="text" class="form-control" placeholder="e.g., Time-travel romance in Paris…" />
                 <button type="button" class="btn" onclick="submitForm()">
                     <span class="d-none d-sm-inline">Search</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
-                         class="bi bi-search d-sm-none" viewBox="0 0 16 16">
-                        <path
-                                d="M11 6a5 5 0 1 0-1.001 9.9h.001a5.002 5.002 0 0 0 4.899-4.899A5 5 0 0 0 11 6zM6 0a6 6 0 0 1 5.917 5.087A6.002 6.002 0 0 1 12 11.917 6 6 0 1 1 6 0z"/>
-                        <path
-                                d="m15.7 14.3-3.9-3.9a6.5 6.5 0 1 1 .8-.8l3.9 3.9a.5.5 0 0 1-.8.8z"/>
-                    </svg>
                 </button>
             </div>
         </form>
     </div>
 </section>
 
-<!-- RESULTS -->
 <section class="py-5">
     <div class="container">
         <div id="movieResults" class="row g-4"></div>
@@ -162,6 +112,31 @@
 </section>
 
 <script>
+    async function fetchAndDisplayMovies(data) {
+        try {
+            const resultsDiv = document.getElementById('movieResults');
+            resultsDiv.innerHTML = `
+        <div class="d-flex justify-content-center align-items-center" style="height: 150px;">
+          <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>`;
+
+            // Scroll immediately to results area to show spinner
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+
+            const response = await fetch('https://movies-finder-vsnw.onrender.com/movies/findSimilar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    }
+
     async function submitForm() {
         const query = document.getElementById('searchQuery').value.trim();
         if (!query) {
@@ -169,28 +144,26 @@
             return;
         }
 
-        const movies = await fetchAndDisplayMovies({ input: query });
-        const results = document.getElementById('movieResults');
-        results.innerHTML = '';
+        const movieData = await fetchAndDisplayMovies({ input: query });
+        const resultsDiv = document.getElementById('movieResults');
+        resultsDiv.innerHTML = '';
 
-        if (!movies.length) {
-            results.innerHTML = '<p class="text-center text-light">No movies found.</p>';
+        if (movieData.length === 0) {
+            resultsDiv.innerHTML = '<p class="text-center text-light">No movies found.</p>';
         } else {
-            movies.forEach(m => {
+            movieData.forEach(m => {
                 const cast = m.cast
-                    ? m.cast.map(c =>
-                        `<a href="https://www.google.com/search?q=${encodeURIComponent(c)}" target="_blank">${c}</a>`
-                    ).join(', ')
+                    ? m.cast.map(c => `<a href="https://www.google.com/search?q=${encodeURIComponent(c)}" target="_blank">${c}</a>`).join(', ')
                     : 'N/A';
 
-                results.insertAdjacentHTML('beforeend', `
+                resultsDiv.insertAdjacentHTML('beforeend', `
           <div class="col-md-6 col-lg-4">
             <div class="movie-card h-100">
-            <h5 class="mb-2">
-  <a href="https://www.imdb.com/find/?q=${encodeURIComponent(m.title)}" target="_blank">
-    ${m.title || 'Untitled'}
-  </a>
-</h5>
+              <h5 class="mb-2">
+                <a href="https://www.imdb.com/find/?q=${encodeURIComponent(m.title)}" target="_blank">
+                  ${m.title || 'Untitled'}
+                </a>
+              </h5>
               <span class="badge bg-secondary mb-3">${m.rating || 'NR'}</span>
               <p class="mb-1"><strong>Year:</strong> ${m.year || '-'}</p>
               <p class="mb-1"><strong>Genres:</strong> ${m.genres ? m.genres.join(', ') : '-'}</p>
@@ -201,14 +174,7 @@
         `);
             });
         }
-
-        // Scroll to results
-        document.getElementById("movieResults").scrollIntoView({ behavior: "smooth" });
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.AOS) AOS.init({ once: true });
-    });
 </script>
 
 </body>
