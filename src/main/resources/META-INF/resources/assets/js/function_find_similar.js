@@ -1,3 +1,19 @@
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.getElementById('movieForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        await submitForm();
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialQuery = urlParams.get('searchQuery');
+    if (initialQuery) {
+        document.getElementById('searchQuery').value = initialQuery;
+        submitForm();
+    }
+});
+
 async function fetchAndDisplayMovies(data, spinnerDiv) {
     try {
 
@@ -22,6 +38,8 @@ async function fetchAndDisplayMovies(data, spinnerDiv) {
         return [];
     }
 }
+
+
 
 async function submitForm() {
     const query = document.getElementById('searchQuery').value.trim();
